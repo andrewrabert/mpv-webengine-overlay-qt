@@ -7,13 +7,13 @@ Demonstrates transparent Qt WebEngine overlays on MPV video rendering.
 
 ## Examples
 
-| Example                             | Description                         | Status    |
-|-------------------------------------|-------------------------------------|-----------|
-| `example_qt5`                       | Qt5 reference implementation        | ✅ Works  |
-| `example_qt6_minimal_migration`     | Minimal Qt5→Qt6 port (same pattern) | ❌ Broken |
-| `example_qt6_artifacts`             | Qt6 with visual distortion artifacts| ❌ Broken |
-| `example_qt6_mpv_only`              | Qt6 with MPV only (no WebEngine)    | ✅ Works  |
-| `example_qt6_with_webengine_broken` | Qt6 with WebEngine overlay          | ❌ Broken |
+| Example                             | Description                         |
+|-------------------------------------|-------------------------------------|
+| `example_qt5`                       | Qt5 reference implementation        |
+| `example_qt6_minimal_migration`     | Minimal Qt5→Qt6 port (same pattern) |
+| `example_qt6_artifacts`             | Qt6 with visual distortion artifacts|
+| `example_qt6_mpv_only`              | Qt6 with MPV only (no WebEngine)    |
+| `example_qt6_with_webengine_broken` | Qt6 with WebEngine overlay          |
 
 ## Screenshots
 
