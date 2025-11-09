@@ -21,13 +21,13 @@ Demonstrates transparent Qt WebEngine overlays on MPV video rendering.
 ![Qt5 Working](qt5.jpg)
 MPV video renders in background with transparent WebEngine overlay on top.
 
+### Qt6 MPV + WebEngine - Broken
+![Qt6 WebEngine Broken](qt6_webengine.jpg)
+Video disappears (black) when WebEngine overlay is added. Only overlay visible.
+
 ### Qt6 MPV - Working
 ![Qt6 MPV Only](qt6_mpv_only.jpg)
 Qt6 MPV rendering works, albeit without the components rendered by WebEngine.
-
-### MPV + WebEngine - Broken
-![Qt6 WebEngine Broken](qt6_webengine.jpg)
-Video disappears (black) when WebEngine overlay is added. Only overlay visible.
 
 ## Requirements
 
