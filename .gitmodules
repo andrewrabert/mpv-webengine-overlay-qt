@@ -1,0 +1,3 @@
+[submodule "example_qt6/mpvqt"]
+	path = example_qt6/mpvqt
+	url = https://github.com/KDE/mpvqt

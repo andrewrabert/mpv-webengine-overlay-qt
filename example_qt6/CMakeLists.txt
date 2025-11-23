@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(QT_MIN_VERSION 6.6.0)
 
 find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Qml Quick WebEngineQuick)
-find_package(MpvQt REQUIRED)
+add_subdirectory(mpvqt)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
