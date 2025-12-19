@@ -231,36 +231,39 @@ int main(int argc, char* argv[])
     // Register QML type
     qmlRegisterType<PlayerQuickItem>("mpvtest", 1, 0, "MpvVideo");
 
-    // Create QML engine and expose MPV handle
-    QQmlApplicationEngine engine;
-    PlayerQuickItem* videoItem = nullptr;
+    int result;
+    {
+        // Create QML engine and expose MPV handle
+        QQmlApplicationEngine engine;
+        PlayerQuickItem* videoItem = nullptr;
 
-    // Load video file after QML is loaded
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, [&](QObject* obj, const QUrl&) {
-        if (obj) {
-            QQuickWindow* window = qobject_cast<QQuickWindow*>(obj);
-            if (window) {
-                // Set vo=libmpv AFTER window is ready (critical - must happen after window creation)
-                mpv_set_property_string(mpv, "vo", "libmpv");
+        // Load video file after QML is loaded
+        QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, [&](QObject* obj, const QUrl&) {
+            if (obj) {
+                QQuickWindow* window = qobject_cast<QQuickWindow*>(obj);
+                if (window) {
+                    // Set vo=libmpv AFTER window is ready (critical - must happen after window creation)
+                    mpv_set_property_string(mpv, "vo", "libmpv");
 
-                videoItem = window->findChild<PlayerQuickItem*>("video");
-                if (videoItem) {
-                    videoItem->setMpvHandle(mpv);
+                    videoItem = window->findChild<PlayerQuickItem*>("video");
+                    if (videoItem) {
+                        videoItem->setMpvHandle(mpv);
 
-                    // Load video with small delay to ensure rendering pipeline is fully initialized
-                    // JMP uses Qt::QueuedConnection pattern, but here we need more time for WebEngine
-                    QTimer::singleShot(100, [videoFile, mpv]() {
-                        const char* cmd[] = {"loadfile", videoFile, nullptr};
-                        mpv_command_async(mpv, 0, cmd);
-                    });
+                        // Load video with small delay to ensure rendering pipeline is fully initialized
+                        // JMP uses Qt::QueuedConnection pattern, but here we need more time for WebEngine
+                        QTimer::singleShot(100, [videoFile, mpv]() {
+                            const char* cmd[] = {"loadfile", videoFile, nullptr};
+                            mpv_command_async(mpv, 0, cmd);
+                        });
+                    }
                 }
             }
-        }
-    });
+        });
 
-    engine.load(QUrl(QStringLiteral("minimal.qml")));
+        engine.load(QUrl(QStringLiteral("minimal.qml")));
 
-    int result = app.exec();
+        result = app.exec();
+    } // engine destroyed here, before mpv cleanup
 
     mpv_terminate_destroy(mpv);
     return result;
