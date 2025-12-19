@@ -222,6 +222,8 @@ int main(int argc, char* argv[])
     mpv_set_option_string(mpv, "osd-level", "0");  // Disable OSD
     mpv_set_option_string(mpv, "ytdl", "no");      // Disable ytdl
     mpv_set_option_string(mpv, "audio-fallback-to-null", "yes");
+    mpv_set_option_string(mpv, "terminal", "yes");
+    mpv_set_option_string(mpv, "msg-level", "all=v");
 
     if (mpv_initialize(mpv) < 0) {
         qFatal("Failed to initialize MPV");
