@@ -262,7 +262,7 @@ int main(int argc, char* argv[])
             }
         });
 
-        engine.load(QUrl(QStringLiteral("minimal.qml")));
+        engine.load(QUrl(QStringLiteral("Main.qml")));
 
         result = app.exec();
     } // engine destroyed here, before mpv cleanup

@@ -94,7 +94,7 @@ Window {
 </head>
 <body>
     <div class="overlay-box">
-        <h1>mpv with Qt WebEngine Overlay (Qt5 OpenGL)</h1>
+        <h1>mpv with Qt WebEngine Overlay<br>Qt5<br>OpenGL</h1>
         <p>This box is rendered by Qt WebEngine</p>
         <p>The video underneath is rendered by mpv</p>
         <p class="tech-note">

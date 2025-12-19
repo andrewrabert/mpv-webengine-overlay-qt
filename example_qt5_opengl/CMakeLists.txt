@@ -24,4 +24,4 @@ target_link_libraries(qt5-mpv-webengine-overlay-opengl
 target_include_directories(qt5-mpv-webengine-overlay-opengl PRIVATE ${MPV_INCLUDE_DIRS})
 
 # Copy QML file to build directory
-configure_file(minimal.qml minimal.qml COPYONLY)
+configure_file(Main.qml Main.qml COPYONLY)

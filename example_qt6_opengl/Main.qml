@@ -100,7 +100,7 @@ ApplicationWindow {
 </head>
 <body>
     <div class="overlay-box">
-        <h1>mpv with Qt WebEngine Overlay (Qt6 OpenGL)</h1>
+        <h1>mpv with Qt WebEngine Overlay<br>Qt6<br>OpenGL</h1>
         <p>This box is rendered by Qt WebEngine</p>
         <p>The video underneath is rendered by mpv (via MpvQt)</p>
         <p class="tech-note">
