@@ -1,46 +1,40 @@
-pragma ComponentBehavior: Bound
+import QtQuick 2.4
+import QtQuick.Window 2.2
+import QtWebEngine 1.7
+import mpvtest 1.0
 
-import QtQuick
-import QtQuick.Controls
-import QtWebEngine
-import Example
-
-ApplicationWindow {
+Window {
     id: mainWindow
     width: 1280
     height: 720
     visible: true
-    title: "mpv with Qt WebEngine Overlay (Qt6 Vulkan)"
+    title: "mpv with Qt WebEngine Overlay (Qt5 OpenGL)"
     color: "#000000"
 
-    // MpvItem - handles video rendering
-    MpvItem {
-        id: mpv
-        objectName: "mpv"
-
-        width: mainWindow.contentItem.width
-        height: mainWindow.contentItem.height
-        anchors.left: mainWindow.contentItem.left
-        anchors.right: mainWindow.contentItem.right
-        anchors.top: mainWindow.contentItem.top
-
-        onReady: {
-            console.log("MPV ready, loading:", videoFile)
-            commandAsync(["loadfile", videoFile])
-        }
+    // MpvVideo item - doesn't render as normal QML item
+    // Instead hooks into beforeRendering signal and draws to OpenGL framebuffer
+    // This is the KEY technique: size 0x0, invisible, but renders to background
+    MpvVideo {
+        id: video
+        objectName: "video"
+        // It's not a real item. Its renderer draws onto the window's background.
+        width: 0
+        height: 0
+        visible: false
     }
 
-    // WebEngineView overlays on top of MPV video
-    // Key technique: transparent background + z-index positioning
+    // WebEngineView overlays on top of the MPV video
     WebEngineView {
-        id: webOverlay
-        width: mpv.width
-        height: mpv.height
-        anchors.left: mpv.left
-        anchors.top: mpv.top
-        z: 100  // Stack above mpv
+        id: web
+        objectName: "web"
+        width: parent.width
+        height: parent.height
         backgroundColor: "transparent"
         settings.showScrollBars: false
+
+        Component.onCompleted: {
+            console.log("WebEngineView loaded")
+        }
 
         url: "data:text/html," + encodeURIComponent(`
 <!DOCTYPE html>
@@ -100,12 +94,12 @@ ApplicationWindow {
 </head>
 <body>
     <div class="overlay-box">
-        <h1>mpv with Qt WebEngine Overlay (Qt6 Vulkan)</h1>
+        <h1>mpv with Qt WebEngine Overlay (Qt5 OpenGL)</h1>
         <p>This box is rendered by Qt WebEngine</p>
-        <p>The video underneath is rendered by mpv (via MpvQt)</p>
+        <p>The video underneath is rendered by mpv</p>
         <p class="tech-note">
             Technique: WebEngineView with transparent background<br>
-            positioned above MpvObject using z-index
+            positioned above mpv video layer
         </p>
     </div>
 </body>

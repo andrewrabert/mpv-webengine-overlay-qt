@@ -6,11 +6,11 @@ Both Qt5 and Qt6 implementations work when using MpvQt library with proper initi
 
 ## Examples
 
-| Example              | Description                                                 |
-|----------------------|-------------------------------------------------------------|
-| `example_qt5`        | Qt5 implementation using raw libmpv                         |
-| `example_qt6_opengl` | Qt6 OpenGL implementation using MpvQt                       |
-| `example_qt6_vulkan` | Qt6 Vulkan implementation using MpvQt ([fork](https://invent.kde.org/andrewrabert/mpvqt/-/tree/vulkan)) and mpv ([fork](https://github.com/andrewrabert/mpv/tree/libmpv-vulkan)) |
+| Example              | Qt     | API    | Notes                                                                                                                                                       |
+|----------------------|--------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `example_qt5_opengl` | Qt5    | OpenGL |                                                                                                                                                             |
+| `example_qt6_opengl` | Qt6.5+ | OpenGL | uses [mpvqt](https://invent.kde.org/libraries/mpvqt)                                                                                                        |
+| `example_qt6_vulkan` | Qt6.7+ | Vulkan | uses [mpvqt (fork)](https://invent.kde.org/andrewrabert/mpvqt/-/tree/vulkan) and [mpv (fork)](https://github.com/andrewrabert/mpv/tree/libmpv-vulkan) |
 
 ## Key Implementation Details
 
@@ -42,10 +42,10 @@ curl -L -o BigBuckBunny_512kb.mp4 https://archive.org/download/BigBuckBunny_328/
 ## Build & Run
 
 ```bash
-# Qt5
-cd example_qt5
+# Qt5 OpenGL
+cd example_qt5_opengl
 cmake -B build && cmake --build build
-./build/minimal-overlay ../BigBuckBunny_512kb.mp4
+./build/qt5-mpv-webengine-overlay-opengl ../BigBuckBunny_512kb.mp4
 
 # Qt6 OpenGL
 cd example_qt6_opengl

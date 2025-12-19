@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5.0)
-project(qt5-mpv-webengine-overlay CXX)
+project(qt5-mpv-webengine-overlay-opengl CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_AUTOMOC ON)
@@ -9,11 +9,11 @@ find_package(Qt5 REQUIRED COMPONENTS Core Qml Quick WebEngine)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MPV REQUIRED mpv)
 
-add_executable(qt5-mpv-webengine-overlay
+add_executable(qt5-mpv-webengine-overlay-opengl
     main.cpp
 )
 
-target_link_libraries(qt5-mpv-webengine-overlay
+target_link_libraries(qt5-mpv-webengine-overlay-opengl
     Qt5::Core
     Qt5::Qml
     Qt5::Quick
@@ -21,7 +21,7 @@ target_link_libraries(qt5-mpv-webengine-overlay
     ${MPV_LIBRARIES}
 )
 
-target_include_directories(qt5-mpv-webengine-overlay PRIVATE ${MPV_INCLUDE_DIRS})
+target_include_directories(qt5-mpv-webengine-overlay-opengl PRIVATE ${MPV_INCLUDE_DIRS})
 
 # Copy QML file to build directory
 configure_file(minimal.qml minimal.qml COPYONLY)
