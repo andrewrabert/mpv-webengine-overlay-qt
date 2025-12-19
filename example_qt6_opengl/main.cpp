@@ -4,6 +4,8 @@
 #include <QQuickWindow>
 #include <QtWebEngineQuick/QtWebEngineQuick>
 
+#include <cstdio>
+
 int main(int argc, char* argv[])
 {
     // Must initialize QtWebEngine before QGuiApplication
@@ -12,7 +14,7 @@ int main(int argc, char* argv[])
     QGuiApplication app(argc, argv);
 
     if (argc < 2) {
-        qFatal("Usage: %s <video-file>", argv[0]);
+        fprintf(stderr, "Usage: %s <video-file>\n", argv[0]);
         return 1;
     }
 

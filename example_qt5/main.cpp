@@ -13,6 +13,7 @@
 #include <mpv/client.h>
 #include <mpv/render_gl.h>
 #include <clocale>
+#include <cstdio>
 
 // Get OpenGL proc address for MPV
 static void* get_proc_address(void* ctx, const char* name)
@@ -200,7 +201,7 @@ int main(int argc, char* argv[])
     QGuiApplication app(argc, argv);
 
     if (argc < 2) {
-        qFatal("Usage: %s <video-file>", argv[0]);
+        fprintf(stderr, "Usage: %s <video-file>\n", argv[0]);
         return 1;
     }
 
