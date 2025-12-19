@@ -1,3 +1,11 @@
-[submodule "example_qt6/mpvqt"]
-	path = example_qt6/mpvqt
+[submodule "example_qt6_opengl/mpvqt"]
+	path = example_qt6_opengl/mpvqt
 	url = https://github.com/KDE/mpvqt
+[submodule "example_qt6_vulkan/mpvqt"]
+	path = example_qt6_vulkan/mpvqt
+	url = https://invent.kde.org/andrewrabert/mpvqt.git
+	branch = vulkan
+[submodule "example_qt6_vulkan/mpv"]
+	path = example_qt6_vulkan/mpv
+	url = https://github.com/andrewrabert/mpv
+	branch = libmpv-vulkan

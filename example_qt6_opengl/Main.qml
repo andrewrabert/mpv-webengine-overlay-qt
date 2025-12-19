@@ -10,7 +10,7 @@ ApplicationWindow {
     width: 1280
     height: 720
     visible: true
-    title: "Qt6 MPV + WebEngine Overlay Example"
+    title: "Qt6 OpenGL MPV + WebEngine Overlay Example"
     color: "#000000"
 
     // MpvItem - handles video rendering
@@ -100,7 +100,7 @@ ApplicationWindow {
 </head>
 <body>
     <div class="overlay-box">
-        <h1>Qt6 WebEngine Overlay Demo</h1>
+        <h1>Qt6 OpenGL WebEngine Overlay Demo</h1>
         <p>This box is rendered by Qt WebEngine</p>
         <p>The video underneath is rendered by MPV (via MpvQt)</p>
         <p class="tech-note">

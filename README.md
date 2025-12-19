@@ -6,10 +6,11 @@ Both Qt5 and Qt6 implementations work when using MpvQt library with proper initi
 
 ## Examples
 
-| Example       | Description                                    |
-|---------------|------------------------------------------------|
-| `example_qt5` | Qt5 implementation using raw libmpv            |
-| `example_qt6` | Qt6 implementation using MpvQt library         |
+| Example              | Description                                                 |
+|----------------------|-------------------------------------------------------------|
+| `example_qt5`        | Qt5 implementation using raw libmpv                         |
+| `example_qt6_opengl` | Qt6 OpenGL implementation using MpvQt                       |
+| `example_qt6_vulkan` | Qt6 Vulkan implementation using MpvQt ([fork](https://invent.kde.org/andrewrabert/mpvqt/-/tree/vulkan)) and mpv ([fork](https://github.com/andrewrabert/mpv/tree/libmpv-vulkan)) |
 
 ## Key Implementation Details
 
@@ -29,6 +30,7 @@ Both Qt5 and Qt6 implementations work when using MpvQt library with proper initi
 
 - **Qt5:** Qt5 (Core, Qml, Quick, WebEngine), libmpv, OpenGL
 - **Qt6:** Qt6 (Core, Qml, Quick, WebEngineQuick), MpvQt, OpenGL
+- **Qt6 Vulkan:** Qt 6.7+, Vulkan SDK, meson, extra-cmake-modules
 
 ## Download Test Video
 Or use any local MP4 file.
@@ -45,8 +47,14 @@ cd example_qt5
 cmake -B build && cmake --build build
 ./build/minimal-overlay ../BigBuckBunny_512kb.mp4
 
-# Qt6
-cd example_qt6
+# Qt6 OpenGL
+cd example_qt6_opengl
 cmake -B build && cmake --build build
-./build/qt6-mpv-webengine-overlay ../BigBuckBunny_512kb.mp4
+./build/qt6-mpv-webengine-overlay-opengl ../BigBuckBunny_512kb.mp4
+
+# Qt6 Vulkan (builds mpv from submodule)
+cd example_qt6_vulkan
+git submodule update --init
+cmake -B build && cmake --build build
+./build/qt6-mpv-webengine-overlay-vulkan ../BigBuckBunny_512kb.mp4
 ```

@@ -10,20 +10,20 @@ add_subdirectory(mpvqt)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
-qt_add_executable(qt6-mpv-webengine-overlay
+qt_add_executable(qt6-mpv-webengine-overlay-opengl
     main.cpp
     mpvitem.h
     mpvitem.cpp
 )
 
-qt_add_qml_module(qt6-mpv-webengine-overlay
+qt_add_qml_module(qt6-mpv-webengine-overlay-opengl
     URI Example
     VERSION 1.0
     QML_FILES
         Main.qml
 )
 
-target_link_libraries(qt6-mpv-webengine-overlay PRIVATE
+target_link_libraries(qt6-mpv-webengine-overlay-opengl PRIVATE
     Qt6::Core
     Qt6::Qml
     Qt6::Quick
