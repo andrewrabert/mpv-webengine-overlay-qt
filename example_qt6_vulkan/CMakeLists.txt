@@ -40,20 +40,20 @@ add_subdirectory(mpvqt)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
-qt_add_executable(qt6-mpv-webengine-overlay-vulkan
+qt_add_executable(mpv-webengine-overlay
     main.cpp
     mpvitem.h
     mpvitem.cpp
 )
 
-qt_add_qml_module(qt6-mpv-webengine-overlay-vulkan
+qt_add_qml_module(mpv-webengine-overlay
     URI Example
     VERSION 1.0
     QML_FILES
         Main.qml
 )
 
-target_link_libraries(qt6-mpv-webengine-overlay-vulkan PRIVATE
+target_link_libraries(mpv-webengine-overlay PRIVATE
     Qt6::Core
     Qt6::Qml
     Qt6::Quick
@@ -63,6 +63,6 @@ target_link_libraries(qt6-mpv-webengine-overlay-vulkan PRIVATE
 )
 
 # Ensure mpv library can be found at runtime
-set_target_properties(qt6-mpv-webengine-overlay-vulkan PROPERTIES
+set_target_properties(mpv-webengine-overlay PROPERTIES
     BUILD_RPATH "${MPV_BUILD_DIR}"
 )
