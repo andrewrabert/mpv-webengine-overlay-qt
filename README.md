@@ -6,11 +6,12 @@ Both Qt5 and Qt6 implementations work when using MpvQt library with proper initi
 
 ## Examples
 
-| Example              | Qt     | API    | Notes                                                                                                                                                       |
-|----------------------|--------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `example_qt5_opengl` | Qt5    | OpenGL |                                                                                                                                                             |
-| `example_qt6_opengl` | Qt6.5+ | OpenGL | uses [mpvqt](https://invent.kde.org/libraries/mpvqt)                                                                                                        |
-| `example_qt6_vulkan` | Qt6.7+ | Vulkan | uses [mpvqt (fork)](https://invent.kde.org/andrewrabert/mpvqt/-/tree/vulkan) and [mpv (fork)](https://github.com/andrewrabert/mpv/tree/libmpv-vulkan) |
+| Example                      | Qt     | API           | Notes                                                                                                   |
+|------------------------------|--------|---------------|---------------------------------------------------------------------------------------------------------|
+| `example_qt5_opengl`         | Qt5    | OpenGL        |                                                                                                         |
+| `example_qt6_opengl`         | Qt6.5+ | OpenGL        | libmpv via [mpvqt](https://invent.kde.org/libraries/mpvqt)                                              |
+| `example_qt6_vulkan`         | Qt6.7+ | Vulkan        | non-upstream [libmpv](https://github.com/andrewrabert/mpv/tree/libmpv-vulkan) with added vulkan support |
+| `example_qt6_nested_wayland` | Qt6.6+ | Wayland (shm) | Nested Wayland compositor embeds external mpv process window                                            |
 
 ## Key Implementation Details
 
@@ -31,6 +32,7 @@ Both Qt5 and Qt6 implementations work when using MpvQt library with proper initi
 - **Qt5:** Qt5 (Core, Qml, Quick, WebEngine), libmpv, OpenGL
 - **Qt6:** Qt6 (Core, Qml, Quick, WebEngineQuick), MpvQt, OpenGL
 - **Qt6 Vulkan:** Qt 6.7+, Vulkan SDK, meson, extra-cmake-modules
+- **Qt6 Nested Wayland:** Qt6 (Core, Qml, Quick, WebEngineQuick, WaylandCompositor), mpv (system), Wayland session
 
 ## Download Test Video
 Or use any local MP4 file.
@@ -57,4 +59,9 @@ cd example_qt6_vulkan
 git submodule update --init
 cmake -B build && cmake --build build
 ./build/qt6-mpv-webengine-overlay-vulkan ../BigBuckBunny_512kb.mp4
+
+# Qt6 Nested Wayland (requires mpv installed, Wayland session)
+cd example_qt6_nested_wayland
+cmake -B build && cmake --build build
+./build/qt6-mpv-webengine-overlay-nested-wayland ../BigBuckBunny_512kb.mp4
 ```
