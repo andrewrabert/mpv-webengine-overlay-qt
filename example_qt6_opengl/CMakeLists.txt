@@ -3,7 +3,7 @@ project(qt6-mpv-webengine-overlay CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(QT_MIN_VERSION 6.6.0)
+set(QT_MIN_VERSION 6.5.0)
 
 find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Qml Quick WebEngineQuick)
 add_subdirectory(mpvqt)
