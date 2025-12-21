@@ -1,14 +1,14 @@
 // Minimal WebEngine overlay using Wayland subsurfaces
-// mpv renders to a subsurface below, WebEngine renders on top
+// mpv renders HDR to a subsurface below, QML WebEngine renders on top
 
 #define VK_USE_PLATFORM_WAYLAND_KHR
 #include <vulkan/vulkan.h>
 
-#include <QApplication>
-#include <QWidget>
-#include <QWindow>
-#include <QWebEngineView>
-#include <QVBoxLayout>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQuickWindow>
+#include <QVulkanInstance>
+#include <QtWebEngineQuick/QtWebEngineQuick>
 #include <qpa/qplatformnativeinterface.h>
 
 #include <wayland-client.h>
@@ -30,7 +30,7 @@ static struct wl_subcompositor *wl_subcompositor = nullptr;
 static struct wl_surface *mpv_surface = nullptr;
 static struct wl_subsurface *mpv_subsurface = nullptr;
 
-// Vulkan for mpv
+// Vulkan for mpv (separate from Qt's Vulkan)
 static VkInstance vk_instance = VK_NULL_HANDLE;
 static VkPhysicalDevice vk_physical_device = VK_NULL_HANDLE;
 static VkDevice vk_device = VK_NULL_HANDLE;
@@ -406,6 +406,9 @@ static void render_loop() {
     mpv_terminate_destroy(mpv);
 }
 
+// Forward declarations for setup after window is ready
+static void setup_mpv_subsurface(QQuickWindow *window, const char *videoFile);
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <video-file>\n", argv[0]);
@@ -415,7 +418,21 @@ int main(int argc, char *argv[]) {
     // mpv requires C locale
     setlocale(LC_NUMERIC, "C");
 
-    QApplication app(argc, argv);
+    // Must initialize QtWebEngine before QGuiApplication
+    QtWebEngineQuick::initialize();
+
+    // Use Vulkan for Qt's rendering
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
+
+    QGuiApplication app(argc, argv);
+
+    // Create QVulkanInstance for Qt (separate from mpv's Vulkan context)
+    QVulkanInstance vulkanInstance;
+    vulkanInstance.setApiVersion(QVersionNumber(1, 2));
+    if (!vulkanInstance.create()) {
+        fprintf(stderr, "Failed to create Qt Vulkan instance\n");
+        return 1;
+    }
 
     // Get Wayland display from Qt
     QPlatformNativeInterface *native = QGuiApplication::platformNativeInterface();
@@ -437,170 +454,96 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // Create main widget with transparent background
-    QWidget *mainWidget = new QWidget();
-    mainWidget->setAttribute(Qt::WA_TranslucentBackground);
-    mainWidget->setAttribute(Qt::WA_NoSystemBackground);
-    mainWidget->setWindowTitle("MPV + WebEngine Overlay");
-    mainWidget->resize(1280, 720);
-    mainWidget->setStyleSheet("background: transparent;");
+    // Create QML engine
+    QQmlApplicationEngine engine;
 
-    // WebEngine overlay - transparent except for content
-    QWebEngineView *webView = new QWebEngineView(mainWidget);
-    webView->setAttribute(Qt::WA_TranslucentBackground);
-    webView->setStyleSheet("background: transparent;");
-    webView->page()->setBackgroundColor(Qt::transparent);
-    webView->setHtml(R"(
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <style>
-        * {
-            box-sizing: border-box;
+    const char *videoFile = argv[1];
+    std::thread *render_thread = nullptr;
+
+    // Connect to window creation to set up subsurface and mpv
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, [&](QObject *obj, const QUrl &) {
+        if (!obj) return;
+
+        QQuickWindow *window = qobject_cast<QQuickWindow*>(obj);
+        if (!window) return;
+
+        // Set Qt's Vulkan instance on the window
+        window->setVulkanInstance(&vulkanInstance);
+
+        // Process events to ensure window is mapped
+        app.processEvents();
+
+        // Get Qt's wl_surface
+        struct wl_surface *qt_surface = (struct wl_surface *)native->nativeResourceForWindow("surface", window);
+        if (!qt_surface) {
+            fprintf(stderr, "Failed to get Qt's wl_surface\n");
+            return;
         }
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: sans-serif;
-            color: #fff;
-            user-select: none;
-        }
+        fprintf(stderr, "*** Got Qt wl_surface: %p ***\n", (void*)qt_surface);
 
-        /* Demo overlay box */
-        .overlay-box {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 40px 60px;
-            border-radius: 10px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
+        // Create mpv's surface and make it a subsurface of Qt's
+        mpv_surface = wl_compositor_create_surface(wl_compositor);
+        mpv_subsurface = wl_subcompositor_get_subsurface(wl_subcompositor, mpv_surface, qt_surface);
 
-        h1 {
-            margin: 0 0 15px 0;
-            font-size: 28px;
-            font-weight: 400;
-        }
+        // Position at 0,0 relative to parent
+        wl_subsurface_set_position(mpv_subsurface, 0, 0);
 
-        p {
-            margin: 8px 0;
-            font-size: 14px;
-            color: #ccc;
-        }
+        // Place BELOW the parent surface (video behind, WebEngine on top)
+        wl_subsurface_place_below(mpv_subsurface, qt_surface);
 
-        .tech-note {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            font-size: 12px;
-            color: #888;
-        }
-    </style>
-</head>
-<body>
-    <div class="overlay-box">
-        <h1>mpv with Qt WebEngine Overlay<br>Qt6<br>HDR Wayland</h1>
-        <p>This box is rendered by Qt WebEngine</p>
-        <p>The video underneath is rendered by mpv (libmpv)</p>
-        <p class="tech-note">
-            Technique: Wayland subsurface for mpv (HDR10)<br>
-            WebEngine on transparent parent surface
-        </p>
-    </div>
-</body>
-</html>
-    )");
+        // Desync mode - subsurface updates independently
+        wl_subsurface_set_desync(mpv_subsurface);
 
-    QVBoxLayout *layout = new QVBoxLayout(mainWidget);
-    layout->addWidget(webView);
-    layout->setContentsMargins(0, 0, 0, 0);
+        wl_surface_commit(mpv_surface);
+        wl_display_roundtrip(wl_display);
 
-    mainWidget->show();
+        fprintf(stderr, "*** Created mpv subsurface below Qt ***\n");
 
-    // Need to process events to get window created
-    app.processEvents();
+        // Get window size
+        sw_width = window->width();
+        sw_height = window->height();
+        fprintf(stderr, "*** Window size: %dx%d ***\n", sw_width, sw_height);
 
-    // Get the native window
-    QWindow *window = mainWidget->windowHandle();
-    if (!window) {
-        fprintf(stderr, "No QWindow\n");
-        return 1;
-    }
+        // Create Vulkan context and swapchain for mpv surface
+        create_vulkan_for_mpv();
+        create_swapchain();
+        create_mpv_render();
 
-    // Get Qt's wl_surface
-    struct wl_surface *qt_surface = (struct wl_surface *)native->nativeResourceForWindow("surface", window);
-    if (!qt_surface) {
-        fprintf(stderr, "Failed to get Qt's wl_surface\n");
-        return 1;
-    }
-    fprintf(stderr, "*** Got Qt wl_surface: %p ***\n", (void*)qt_surface);
+        // Load video
+        const char *cmd[] = {"loadfile", videoFile, nullptr};
+        mpv_command(mpv, cmd);
 
-    // Create mpv's surface and make it a subsurface of Qt's
-    mpv_surface = wl_compositor_create_surface(wl_compositor);
-    mpv_subsurface = wl_subcompositor_get_subsurface(wl_subcompositor, mpv_surface, qt_surface);
+        // Handle window resize
+        QObject::connect(window, &QWindow::widthChanged, [window](int) {
+            pending_width = window->width();
+            pending_height = window->height();
+            needs_resize = true;
+        });
+        QObject::connect(window, &QWindow::heightChanged, [window](int) {
+            pending_width = window->width();
+            pending_height = window->height();
+            needs_resize = true;
+        });
 
-    // Position at 0,0 relative to parent
-    wl_subsurface_set_position(mpv_subsurface, 0, 0);
-
-    // Place BELOW the parent surface (video behind, WebEngine on top)
-    wl_subsurface_place_below(mpv_subsurface, qt_surface);
-
-    // Desync mode - subsurface updates independently
-    wl_subsurface_set_desync(mpv_subsurface);
-
-    wl_surface_commit(mpv_surface);
-    wl_display_roundtrip(wl_display);
-
-    fprintf(stderr, "*** Created mpv subsurface below Qt ***\n");
-
-    // Get window size
-    sw_width = mainWidget->width();
-    sw_height = mainWidget->height();
-    fprintf(stderr, "*** Window size: %dx%d ***\n", sw_width, sw_height);
-
-    // Create Vulkan context and swapchain for mpv surface
-    create_vulkan_for_mpv();
-    create_swapchain();
-    create_mpv_render();
-
-    // Load video
-    const char *cmd[] = {"loadfile", argv[1], nullptr};
-    mpv_command(mpv, cmd);
-
-    // Handle window resize - always get both dimensions from window
-    QObject::connect(window, &QWindow::widthChanged, [window](int) {
-        pending_width = window->width();
-        pending_height = window->height();
-        needs_resize = true;
-    });
-    QObject::connect(window, &QWindow::heightChanged, [window](int) {
-        pending_width = window->width();
-        pending_height = window->height();
-        needs_resize = true;
+        // Start render thread
+        render_thread = new std::thread(render_loop);
     });
 
-    // Start render thread
-    std::thread render_thread(render_loop);
-
-    // Handle window close
+    // Handle app quit
     QObject::connect(&app, &QGuiApplication::aboutToQuit, [&]() {
         running = false;
     });
 
+    // Load QML
+    engine.loadFromModule("Example", "Main");
+
     int ret = app.exec();
 
     running = false;
-    render_thread.join();
+    if (render_thread) {
+        render_thread->join();
+        delete render_thread;
+    }
 
-    delete mainWidget;
     return ret;
 }

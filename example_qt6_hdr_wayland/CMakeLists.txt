@@ -28,14 +28,22 @@ if(NOT EXISTS "${MPV_BUILD_DIR}/libmpv.so")
     endif()
 endif()
 
-find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Gui GuiPrivate Widgets WebEngineWidgets)
+find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Gui GuiPrivate Qml Quick WebEngineQuick)
 find_package(Vulkan REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(WAYLAND_CLIENT REQUIRED wayland-client)
 
-# Main target: mpv + WebEngine overlay using Wayland subsurfaces
-# mpv renders HDR to its own subsurface, WebEngine renders transparently on top
-add_executable(mpv-webengine-overlay main.cpp)
+qt_standard_project_setup(REQUIRES 6.5)
+
+qt_add_executable(mpv-webengine-overlay main.cpp)
+
+qt_add_qml_module(mpv-webengine-overlay
+    URI Example
+    VERSION 1.0
+    QML_FILES
+        Main.qml
+)
+
 target_include_directories(mpv-webengine-overlay PRIVATE
     ${MPV_SOURCE_DIR}/include
     ${WAYLAND_CLIENT_INCLUDE_DIRS}
@@ -44,8 +52,9 @@ target_link_libraries(mpv-webengine-overlay PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::GuiPrivate
-    Qt6::Widgets
-    Qt6::WebEngineWidgets
+    Qt6::Qml
+    Qt6::Quick
+    Qt6::WebEngineQuick
     ${MPV_BUILD_DIR}/libmpv.so
     Vulkan::Vulkan
     ${WAYLAND_CLIENT_LIBRARIES}
